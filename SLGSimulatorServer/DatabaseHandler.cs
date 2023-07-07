@@ -66,15 +66,15 @@ namespace SLGSimulatorServer
                         var item = args[i];
                         if (item.Value == "string")
                         {
-                            sql.Append(item.Key + " VARCHAR(255) NOT NULL,");
+                            sql.Append(item.Key + " VARCHAR(255),");
                         }
                         else if (item.Value == "int")
                         {
-                            sql.Append(item.Key + " INT NOT NULL,");
+                            sql.Append(item.Key + " INT,");
                         }
                         else if (item.Value == "float" || item.Value == "number")
                         {
-                            sql.Append(item.Key + " DECIMAL(10, 2) NOT NULL,");
+                            sql.Append(item.Key + " DECIMAL(10, 2),");
                         }
                         else if (item.Value == "bool")
                         {
@@ -186,7 +186,7 @@ namespace SLGSimulatorServer
 
         }
 
-        public bool UpgradeUniversal(string databaseName, string tableName, string selectString, string selectValue, string property, string value)
+        public bool UpgradeUniversal(string databaseName, string tableName, string conditionProperty, string conditionValue, string property, string value)
         {
             try
             {
@@ -195,7 +195,7 @@ namespace SLGSimulatorServer
                     connection.ChangeDatabase(databaseName);
                     string sqlQuery =
                         "UPDATE " + tableName + " SET " + property + " = '"
-                        + value + "' WHERE " + selectString + " = '" + selectValue + "';";
+                        + value + "' WHERE " + conditionProperty + " = '" + conditionValue + "';";
                     MySqlCommand cmd = new MySqlCommand(sqlQuery, connection);
                     cmd.ExecuteNonQuery();
                     connection.Close();
