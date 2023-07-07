@@ -7,9 +7,7 @@ using Photon.SocketServer;
 using ExitGames.Logging;
 using System.IO;
 using ExitGames.Logging.Log4Net;
-using PhotonHostRuntimeInterfaces;
 using log4net.Config;
-using System.Security.Cryptography;
 
 namespace SLGSimulatorServer
 {
@@ -31,8 +29,8 @@ namespace SLGSimulatorServer
             DatabaseHandler db = new DatabaseHandler();
             db.ConnectionTest();
             db.CreateDatabase(databaseName);
-            db.CreateTable(databaseName, tableName, Data.Types.ToArray());
-
+            db.CreateTable(databaseName, tableName, Data.PlayerTypes.ToArray());
+            db.CreateTable(databaseName, "city", Data.CityTypes.ToArray());
         }
 
         public static void LoggerInitial(string applicationRootPath, string binaryPath)
