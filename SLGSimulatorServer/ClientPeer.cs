@@ -22,20 +22,29 @@ namespace SLGSimulatorServer
 
         protected override void OnOperationRequest(OperationRequest operationRequest, SendParameters sendParameters)
         {
+            OperationResponse res;
             switch (operationRequest.OperationCode)
             {
                 case (byte)Service.MessageCode.signup:
-                    OperationResponse res = Service.SignupHanlder(operationRequest.Parameters);
+                    res = Service.SignupHanlder(operationRequest.Parameters);
                     SendOperationResponse(res, sendParameters);
                     break;
                 case (byte)Service.MessageCode.login:
-                    Service.LoginHandler(operationRequest.Parameters);
+                    res = Service.LoginHandler(operationRequest.Parameters);
+                    SendOperationResponse(res, sendParameters);
                     break;
                 case (byte)Service.MessageCode.attack:
-                    Service.AttackHandler(operationRequest.Parameters);
+                    res = Service.AttackHandler(operationRequest.Parameters);
+                    SendOperationResponse(res, sendParameters);
+                    // await for 5 seconds to simulate the attack
+                    System.Threading.Thread.Sleep(5000);
+                    // send upgrade event to client
+                    EventData eventData = Service.UpgradeTrigger();
+                    SendEvent(eventData, new SendParameters());
                     break;
                 case (byte)Service.MessageCode.upgradeInfo:
-                    Service.UpgradeInfoHandler(operationRequest.Parameters);
+                    res = Service.UpgradeInfoHandler(operationRequest.Parameters);
+                    SendOperationResponse(res, sendParameters);
                     break;
                 default:
                     break;
