@@ -6,18 +6,26 @@ namespace SLGSimulatorServer
 {
     public sealed class Data
     {
-        private static Dictionary<string, string> types;
-
+        private static Dictionary<string, string> playerTypes;
+        private static Dictionary<string, string> cityTypes;
         static Data()
         {
-            var rawTypes = new Dictionary<string, string> {
+            playerTypes = new Dictionary<string, string> {
                 { "username", "string" },
-                {"password", "string" },
-                {"soldierNum", "int" },
+                { "password", "string" },
+                { "soldierNum", "int" },
+                { "cityId", "int" },
             };
-            types = rawTypes;
+            cityTypes = new Dictionary<string, string>
+            {
+                { "userId", "int" },
+                { "username", "string" },
+                { "cityName", "string" },
+            };
         }
 
-        public static List<KeyValuePair<string, string>> Types => types.ToList();
+        public static List<KeyValuePair<string, string>> PlayerTypes => playerTypes.ToList();
+
+        public static List<KeyValuePair<string, string>> CityTypes => cityTypes.ToList();
     }
 }
