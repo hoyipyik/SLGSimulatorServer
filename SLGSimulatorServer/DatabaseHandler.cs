@@ -225,7 +225,12 @@ namespace SLGSimulatorServer
                             Dictionary<string, object> data = new Dictionary<string, object>() { };
                             for (int i = 0; i < reader.FieldCount; i++)
                             {
-                                data.Add(reader.GetName(i), reader.GetValue(i));
+                                object value = reader.GetValue(i);
+                                if (value == System.DBNull.Value)
+                                {
+                                    value = null; // replace it with null or a default value
+                                }
+                                data.Add(reader.GetName(i), value);
                             }
                             dataList.Add(data);
                         }
@@ -240,23 +245,31 @@ namespace SLGSimulatorServer
                 return null;
             }
         }
+        
         public List<Dictionary<string, object>> QueryAll(string databaseName, string tableName)
         {
             try
             {
                 List<Dictionary<string, object>> dataList = new List<Dictionary<string, object>>();
-                using (MySqlConnection connection = new MySqlConnection(this.connectionString)) {
+                using (MySqlConnection connection = new MySqlConnection(this.connectionString))
+                {
                     connection.Open();
                     connection.ChangeDatabase(databaseName);
                     string sqlQuery = "SELECT * FROM " + tableName + ";";
                     MySqlCommand cmd = new MySqlCommand(sqlQuery, connection);
-                    using (MySqlDataReader reader = cmd.ExecuteReader()) {
+                    using (MySqlDataReader reader = cmd.ExecuteReader())
+                    {
                         while (reader.Read())
                         {
                             Dictionary<string, object> data = new Dictionary<string, object>() { };
                             for (int i = 0; i < reader.FieldCount; i++)
                             {
-                                data.Add(reader.GetName(i), reader.GetValue(i));
+                                object value = reader.GetValue(i);
+                                if (value == System.DBNull.Value)
+                                {
+                                    value = null; // replace it with null or a default value
+                                }
+                                data.Add(reader.GetName(i), value);
                             }
                             dataList.Add(data);
                         }
