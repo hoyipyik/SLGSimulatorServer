@@ -189,17 +189,20 @@ namespace SLGSimulatorServer
                 return GenerateLoginResponse(false, "Database connection failed");
             }
             List<Dictionary<string, object>> res = db.QueryUniversal(Utils.databaseName, Utils.tableName, "*", "username", username);
-            res[0].TryGetValue("password", out object realPassword);
-            if (realPassword == null)
+            // null check
+            if (res.Count == 0)
             {
                 Utils.ErrorHandler(false, "Username not exist");
                 return GenerateLoginResponse(false, "Username not exist");
             }
+            res[0].TryGetValue("password", out object realPassword);
             if (realPassword.ToString() == password)
             {
                 List<Dictionary<string, object>> fullUserData = db.QueryAll(Utils.databaseName, Utils.tableName);
                 List<Dictionary<string, object>> fullCityData = db.QueryAll(Utils.databaseName, "city");
                 Utils.ErrorHandler(true, "Login success");
+                //Utils.Printer(fullUserData);
+                //Utils.Printer(fullCityData);
                 return GenerateLoginResponse(true, "Login success", fullUserData, fullCityData);
             }
             else
@@ -227,24 +230,50 @@ namespace SLGSimulatorServer
                 return GenerateAttackResponse(false, "Database connection failed");
             }
             List<Dictionary<string, object>> res = db.QueryUniversal(Utils.databaseName, "city", "*", "id", targetCityId.ToString());
+            // res null check
+            if (res.Count == 0)
+            {
+                Utils.ErrorHandler(false, "City not exist");
+                return GenerateAttackResponse(false, "City not exist");
+            }
             res[0].TryGetValue("userId", out object originalOwnerId);
-            if(originalOwnerId == null)
+            // get user soldier number
+            List<Dictionary<string, object>> userRes = db.QueryUniversal(Utils.databaseName, Utils.tableName, "*", "id", userId.ToString());
+            // null check
+            if (userRes.Count == 0)
+            {
+                Utils.ErrorHandler(false, "User not exist");
+                return GenerateAttackResponse(false, "User not exist");
+            }
+            userRes[0].TryGetValue("soldierNum", out object userSoldierNum);
+            userRes[0].TryGetValue("username", out object username);
+            if (originalOwnerId == null)
             {
                 db.UpgradeUniversal(Utils.databaseName, "city", "id", targetCityId.ToString(), "userId", userId.ToString());
+                db.UpgradeUniversal(Utils.databaseName, "city", "id", targetCityId.ToString(), "username", username.ToString());
                 Utils.ErrorHandler(true, "Occupy empty city success");
                 return GenerateAttackResponse(true, "Occupy empty city success");
             }
             else
             {
-                // get user soldier number
-                List<Dictionary<string, object>> userRes = db.QueryUniversal(Utils.databaseName, Utils.tableName, "*", "id", userId.ToString());
-                userRes[0].TryGetValue("soldierNum", out object userSoldierNum);
+                if (originalOwnerId.ToString() == userId.ToString())
+                {
+                    Utils.ErrorHandler(false, "Cannot attack your own city");
+                    return GenerateAttackResponse(false, "Cannot attack your own city");
+                }
                 // get enemy soldier number
                 List<Dictionary<string, object>> enemyRes = db.QueryUniversal(Utils.databaseName, Utils.tableName, "*", "id", originalOwnerId.ToString());
+                // null check
+                if (enemyRes.Count == 0)
+                {
+                    Utils.ErrorHandler(false, "Enemy not exist");
+                    return GenerateAttackResponse(false, "Enemy not exist");
+                }
                 enemyRes[0].TryGetValue("soldierNum", out object enemySoldierNum);
                 if ((int)userSoldierNum > (int)enemySoldierNum)
                 {
                     db.UpgradeUniversal(Utils.databaseName, "city", "id", targetCityId.ToString(), "userId", userId.ToString());
+                    db.UpgradeUniversal(Utils.databaseName, "city", "id", targetCityId.ToString(), "username", username.ToString());
                     db.UpgradeUniversal(Utils.databaseName, Utils.tableName, "id", userId.ToString(), "soldierNum", ((int)userSoldierNum - (int)enemySoldierNum).ToString());
                     db.UpgradeUniversal(Utils.databaseName, Utils.tableName, "id", originalOwnerId.ToString(), "soldierNum", 0.ToString());
                     Utils.ErrorHandler(true, "Occupy enemy city success");
@@ -253,8 +282,8 @@ namespace SLGSimulatorServer
                 else
                 {
                     db.UpgradeUniversal(Utils.databaseName, Utils.tableName, "id", userId.ToString(), "soldierNum", 0.ToString());
-                    Utils.ErrorHandler(true, "Occupy enemy city failed");
-                    return GenerateAttackResponse(true, "Occupy enemy city failed");
+                    Utils.ErrorHandler(false, "Occupy enemy city failed");
+                    return GenerateAttackResponse(false, "Occupy enemy city failed");
                 }
             }
         }

@@ -44,6 +44,18 @@ namespace SLGSimulatorServer
             }
         }
 
+        public static void Printer(List<Dictionary<string, object>> data)
+        {
+            foreach (var item in data)
+            {
+                foreach (var pair in item)
+                {
+                    log.Info(pair.Key + ": " + pair.Value);
+                }
+                log.Info("  ");
+            }
+        }
+
         public static void ErrorHandler(bool flag, string msg = "Operation")
         {
             if (flag)
