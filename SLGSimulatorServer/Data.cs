@@ -14,7 +14,6 @@ namespace SLGSimulatorServer
                 { "username", "string" },
                 { "password", "string" },
                 { "soldierNum", "int" },
-                { "cityId", "int" },
             };
             cityTypes = new Dictionary<string, string>
             {
