@@ -43,6 +43,9 @@ namespace SLGSimulatorServer
             message = 1,
             userData = 2,
             cityData = 3,
+            username = 4,
+            userId = 5,
+            soldierNum = 6,
         }
 
         public enum AttackData : byte
@@ -106,14 +109,18 @@ namespace SLGSimulatorServer
         }
 
         private static OperationResponse GenerateLoginResponse(bool status, string message,
-            List<Dictionary<string, object>> userData = null, List<Dictionary<string, object>> cityData = null)
+            List<Dictionary<string, object>> userData = null, List<Dictionary<string, object>> cityData = null,
+            string username = null, int userId = -1, int soldierNum = 0)
         {
             return new OperationResponse((byte)MessageCode.login, new Dictionary<byte, object>
             {
                 { (byte)LoginResponse.status, status },
                 { (byte)LoginResponse.message, message },
                 { (byte)LoginResponse.userData, userData },
-                { (byte)LoginResponse.cityData, cityData }
+                { (byte)LoginResponse.cityData, cityData },
+                { (byte)LoginResponse.username, username },
+                { (byte)LoginResponse.userId, userId },
+                { (byte)LoginResponse.soldierNum, soldierNum }
             });
         }
 
@@ -154,6 +161,12 @@ namespace SLGSimulatorServer
                 {
                     Utils.ErrorHandler(flag, "Database connection failed");
                     return GenerateSignupResponse(false, "Database connection failed");
+                }
+                List<Dictionary<string, object>> res = db.QueryUniversal(Utils.databaseName, Utils.tableName, "*", "username", username);
+                if (res.Count != 0)
+                {
+                    Utils.ErrorHandler(false, "Username already exists");
+                    return GenerateSignupResponse(false, "Username already exists");
                 }
                 flag = db.InsertData(Utils.databaseName, Utils.tableName, insertData.ToArray());
                 if (!flag)
@@ -196,6 +209,8 @@ namespace SLGSimulatorServer
                 return GenerateLoginResponse(false, "Username not exist");
             }
             res[0].TryGetValue("password", out object realPassword);
+            int userId = (int)res[0]["id"];
+            int soldierNum = (int)res[0]["soldierNum"];
             if (realPassword.ToString() == password)
             {
                 List<Dictionary<string, object>> fullUserData = db.QueryAll(Utils.databaseName, Utils.tableName);
@@ -203,7 +218,7 @@ namespace SLGSimulatorServer
                 Utils.ErrorHandler(true, "Login success");
                 //Utils.Printer(fullUserData);
                 //Utils.Printer(fullCityData);
-                return GenerateLoginResponse(true, "Login success", fullUserData, fullCityData);
+                return GenerateLoginResponse(true, "Login success", fullUserData, fullCityData, username, userId, soldierNum);
             }
             else
             {
