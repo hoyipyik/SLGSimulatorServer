@@ -140,7 +140,7 @@ namespace SLGSimulatorServer
             string username = (string)param[(byte)SignupData.username];
             string password = (string)param[(byte)SignupData.password];
             string confirmPassword = (string)param[(byte)SignupData.confirmPassword];
-            if (username == null || password == null || confirmPassword == null)
+            if (username == null || password == null || confirmPassword == null || username == "" || password == "")
             {
                 Utils.ErrorHandler(false, "Invalid parameters");
                 return GenerateSignupResponse(false, "Invalid parameters");
