@@ -58,6 +58,7 @@ namespace SLGSimulatorServer
         {
             status = 0,
             message = 1,
+            newSoldierNum = 2,
         }
 
         public enum upgradeTriggerResponse: byte
@@ -99,12 +100,13 @@ namespace SLGSimulatorServer
             });
         }
 
-        private static OperationResponse GenerateAttackResponse(bool status, string message)
+        private static OperationResponse GenerateAttackResponse(bool status, string message, int soldierNum = 0)
         {
             return new OperationResponse((byte)MessageCode.attack, new Dictionary<byte, object>
             {
                 { (byte)AttackResponse.status, status },
-                { (byte)AttackResponse.message, message }
+                { (byte)AttackResponse.message, message },
+                { (byte)AttackResponse.newSoldierNum, soldierNum }
             });
         }
 
@@ -267,7 +269,7 @@ namespace SLGSimulatorServer
                 db.UpgradeUniversal(Utils.databaseName, "city", "id", targetCityId.ToString(), "userId", userId.ToString());
                 db.UpgradeUniversal(Utils.databaseName, "city", "id", targetCityId.ToString(), "username", username.ToString());
                 Utils.ErrorHandler(true, "Occupy empty city success");
-                return GenerateAttackResponse(true, "Occupy empty city success");
+                return GenerateAttackResponse(true, "Occupy empty city success", (int)userSoldierNum);
             }
             else
             {
@@ -292,7 +294,7 @@ namespace SLGSimulatorServer
                     db.UpgradeUniversal(Utils.databaseName, Utils.tableName, "id", userId.ToString(), "soldierNum", ((int)userSoldierNum - (int)enemySoldierNum).ToString());
                     db.UpgradeUniversal(Utils.databaseName, Utils.tableName, "id", originalOwnerId.ToString(), "soldierNum", 0.ToString());
                     Utils.ErrorHandler(true, "Occupy enemy city success");
-                    return GenerateAttackResponse(true, "Occupy enemy city success");
+                    return GenerateAttackResponse(true, "Occupy enemy city success", (int)userSoldierNum - (int)enemySoldierNum);
                 }
                 else
                 {
