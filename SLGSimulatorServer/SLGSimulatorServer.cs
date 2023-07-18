@@ -13,7 +13,7 @@ namespace SLGSimulatorServer
 {
     public class SLGSimulatorServer : ApplicationBase
     {
-       
+        public static List<ClientPeer> PeerList = new List<ClientPeer>();
 
         protected override void Setup()
         {
@@ -30,7 +30,9 @@ namespace SLGSimulatorServer
         protected override PeerBase CreatePeer(InitRequest initRequest)
         {
             Utils.log.Info("New peer added ! " + initRequest);
-            return new ClientPeer(initRequest);
+            var peer = new ClientPeer(initRequest); 
+            PeerList.Add(peer);
+            return peer;
         }
     }
 }
